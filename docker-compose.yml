@@ -1,0 +1,32 @@
+version: "3.3"
+
+#links - это как домены, если мы указываем название контейнера, то вместо его имени подставляется его ip-адрес
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx.Dockerfile #Указываем путь к докерфайлу, который собирает nginx
+    ports:
+      - 8000:80 #Указываем внешний:внутришний порт
+    links:
+      - fpm #Соеденяем с контейнером fpm
+  fpm:
+    build:
+      context: .
+      dockerfile: docker/php.Dockerfile #Указываем путь к докерфайлу который собирает php-fpm
+    volumes:
+      - ./:/var/www/lumen #Монтируем папку нашего проекта внутрь контейнера
+    links:
+      - mysql #Соеденяем с контейнером mysql
+  mysql:
+    image: mysql
+    ports:
+      - 13306:3306 #Указываем внешний:внутришний порт
+    environment:
+      - MYSQL_ROOT_PASSWORD=root #Устанавливаем пароль для пользователя "root"
+      - MYSQL_DATABASE=lumen #Указываем, как будет называться наша БД
+    volumes:
+      - ./data/mysql:/var/lib/mysql #Монтируем папку ./data/mysql внутрь контейнера для сохранения базы mysql
+
+
